@@ -1,0 +1,7 @@
+- name: Start MySQL
+  service: name=mysqld state=started
+  sudo: True
+
+- name: Restart MySQL
+  service: name=mysqld state=started
+  sudo: True

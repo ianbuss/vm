@@ -1,0 +1,34 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+domain = 'compute.local'
+master_node_count = 1
+worker_node_count = 1
+node_count = master_node_count + worker_node_count
+master_node_mem = 4096
+worker_node_mem = 4096
+
+Vagrant.configure(2) do |config|
+  # Set common node options.
+  config.vm.box = "centos-6.5"
+  config.ssh.pty = true
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+  config.vm.provider "virtualbox" do |vb|
+    vb.gui = false
+  end 
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "ansible/main.yml"
+    ansible.verbose = "vv"
+    ansible.limit = "all"
+  end
+
+  # Build out each node.
+  node_count.times do |i|
+    node_id = "node#{i}"
+    config.vm.define node_id do |node|
+      node.vm.hostname = "#{node_id}.#{domain}"
+      node.vm.network "private_network", ip: "192.168.33.#{node_id}"
+    end
+  end
+
+  
+end

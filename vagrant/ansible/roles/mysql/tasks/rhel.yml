@@ -1,0 +1,12 @@
+- name: Installing MySQL server package
+  yum: name=mysql-server state=present
+  sudo: True
+  
+- name: Installing MySQL client package
+  yum: name=mysql state=present
+  sudo: True
+
+- name: Installing MySQL JDBC connector
+  yum: name=mysql-connector-java state=present
+  sudo: True
+

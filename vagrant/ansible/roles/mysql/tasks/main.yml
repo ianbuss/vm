@@ -1,0 +1,19 @@
+- name: Installing MySQL database
+  include: rhel.yml
+  when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS'
+
+- name: Enabling MySQL to start at boot time
+  service: name=mysqld enabled=true
+  sudo: True
+
+- name: Creating relevant MySQL directories
+  file: dest=/var/lib/mysql/logs/binary/mysql_binary_log mode=750 owner=mysql group=mysql state=directory
+  sudo: True
+
+- name: Configuring MySQL database
+  template: src=templates/my.conf.tpl dest=/etc/my.conf
+  with_items:
+    - { buffer_pool_size: "{{ (0.05 * ansible_memtotal_mb)|round|int }}MB", thread_concurrency:  "{{ ansible_processor_count * 2 }}", log_file_size: '128MB'  }
+  sudo: True
+  notify:
+    - Start MySQL

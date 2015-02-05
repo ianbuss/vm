@@ -1,0 +1,17 @@
+- name: Configuring Cloudera Manager YUM repository file
+  template: src=templates/common/rhel/yum.repo.tpl dest=/etc/yum.repos.d/cm.repo
+  with_items:
+    - { header: "cloudera-manager", name: "Cloudera Manager", base_url: "{{ cloudera_archive  }}/cm{{ cm_major_version }}/redhat/6/x86_64/cm/{{ cm_major_version  }}", gpg_check: 1, gpg_key: "{{ cloudera_archive  }}/cm{{ cm_major_version }}/redhat/6/x86_64/cm/RPM-GPG-KEY-cloudera" } 
+  sudo: True
+
+- name: Clean YUM package cache
+  command: yum clean all
+  sudo: True
+
+- name: Install cloudera-manager package
+  yum: name=cloudera-manager-server state=present
+  sudo: True
+
+- name: Install cloudera-manager-daemons package
+  yum: name=cloudera-manager-daemons state=present
+  sudo: True
