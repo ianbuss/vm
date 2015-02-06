@@ -1,12 +1,16 @@
-- name: Installing MySQL server package
+- name: Install MySQL server package
   yum: name=mysql-server state=present
   sudo: True
   
-- name: Installing MySQL client package
+- name: Install MySQL client package
   yum: name=mysql state=present
   sudo: True
 
-- name: Installing MySQL JDBC connector
+- name: Install MySQL JDBC connector
   yum: name=mysql-connector-java state=present
+  sudo: True
+
+- name: Install MySQL python package #required for mysql_db tasks
+  yum: name=MySQL-python state=present
   sudo: True
 
