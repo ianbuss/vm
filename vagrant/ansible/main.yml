@@ -3,5 +3,4 @@
   # Cloudera Manager Host
   - hosts: node0
     roles:
-      - common
       - mysql

@@ -1,0 +1,8 @@
+- name: Configure VM Swappiness as zero
+  lineinfile: 
+    dest=/etc/sysctl.conf
+    line="vm.swappiness=0"
+    regexp=".[vm\.swappiness]+"
+    owner=root
+    state=present
+  sudo: True
