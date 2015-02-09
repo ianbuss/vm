@@ -1,3 +1,23 @@
 - name: Configure Cloudera Manager repository
   include: rhel.yml
   when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS'
+
+- name: Configure Cloudera Manager Databases
+  mysql_db: name="{{ item }}" login_user="root" login_password="{{ mysql_root_password }}" state=present encoding="utf8"
+  with_items: cloudera_manager_dbs
+
+- name: Configure Cloudera Manager Users (local)
+  mysql_user: name="{{ item }}" password="{{ item }}" priv="{{ item }}.*:ALL" login_user="root" login_password="{{ mysql_root_password }}" state=present
+  with_items: cloudera_manager_dbs
+
+- name: Configure Cloudera Manager Users (%)
+  mysql_user: name="{{ item }}" password="{{ item }}" priv="{{ item }}.*:ALL" host="%" login_user="root" login_password="{{ mysql_root_password }}" state=present
+  with_items: cloudera_manager_dbs
+
+- name: Deploy Cloudera Manager Database Configuration
+  template: src=roles/cloudera-manager/templates/db.properties.tpl dest=/etc/cloudera-scm-server/db.properties owner=cloudera-scm group=cloudera-scm mode=600
+  sudo: True
+
+- name: Start Cloudera Manager
+  service: name=cloudera-scm-server state=started
+  sudo: True

@@ -1,6 +1,12 @@
 ---
 
+  # All Hosts
+  - hosts: all
+    roles:
+      - common
+
   # Cloudera Manager Host
   - hosts: node0
     roles:
       - mysql
+      - cloudera-manager

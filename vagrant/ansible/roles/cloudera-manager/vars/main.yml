@@ -1,0 +1,14 @@
+cloudera_repository: "http://archive.cloudera.com"
+cloudera_manager_major_version: 5
+cloudera_manager_version: 5.3.1
+cloudera_manager_dbs:
+ - scm
+ - amon
+ - hmon
+ - smon
+ - rman
+cdh_service_dbs:
+  - hive
+  - impala
+  - oozie
+

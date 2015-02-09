@@ -1,8 +1,36 @@
+- name: Disable IPv6
+  lineinfile:
+    dest=/etc/sysctl.conf
+    line="net.ipv6.conf.all.disable_ipv6=1"
+    regexp="^net.\ipv6\.conf\.all\.disable_ipv6=+"
+    insertafter="EOF"
+    owner=root
+    state=present
+  notify:
+    - Refresh Kernel
+    - Restart Networking
+  sudo: True
+
+- name: Disable IPv6 (default)
+  lineinfile:
+    dest=/etc/sysctl.conf
+    line="net.ipv6.conf.default.disable_ipv6=1"
+    regexp="^net.\ipv6\.conf\.default\.disable_ipv6=+"
+    insertafter="EOF"
+    owner=root
+    state=present
+  notify:
+    - Refresh Kernel
+    - Restart Networking
+  sudo: True
+
 - name: Configure VM Swappiness as zero
   lineinfile: 
     dest=/etc/sysctl.conf
     line="vm.swappiness=0"
-    regexp=".[vm\.swappiness]+"
+    regexp="^vm\.swappiness=+"
     owner=root
     state=present
+  notify:
+    - Refresh Kernel
   sudo: True
