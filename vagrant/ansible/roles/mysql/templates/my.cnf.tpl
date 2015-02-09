@@ -1,4 +1,5 @@
 [mysqld]
+bind-address = 0.0.0.0
 transaction-isolation = READ-COMMITTED
 datadir = /var/lib/mysql
 socket = /var/lib/mysql/mysql.sock

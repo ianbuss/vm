@@ -1,1 +1,4 @@
-mysql_root_password: cloudera
+mysql_root_password: "cloudera"
+mysql_thread_count: "{{ ansible_processor_count * 2 }}"
+mysql_log_file_size: "128MB"
+mysql_buffer_pool_size: "{{ (0.05 * ansible_memtotal_mb)|round|int }}MB"

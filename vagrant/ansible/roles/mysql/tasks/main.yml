@@ -10,13 +10,20 @@
   file: dest=/var/lib/mysql/logs/binary/mysql_binary_log mode=750 owner=mysql group=mysql state=directory
   sudo: True
 
-- name: Configuring MySQL database
-  template: src=templates/my.conf.tpl dest=/etc/my.conf
+- name: Configuring MySQL
+  template: src=roles/mysql/templates/my.cnf.tpl dest=/etc/my.cnf
   with_items:
-    - { buffer_pool_size: "{{ (0.05 * ansible_memtotal_mb)|round|int }}MB", thread_concurrency:  "{{ ansible_processor_count * 2 }}", log_file_size: '128MB'  }
+    - { buffer_pool_size: "{{ mysql_buffer_pool_size }}", thread_concurrency:  "{{ mysql_thread_count }}", log_file_size: "{{ mysql_log_file_size }}"  }
   sudo: True
-  notify:
-    - Start MySQL
+
+- name: Initialising MySQL
+  command: mysql_install_db creates=/var/lib/mysql/mysql
+  sudo: True
+  sudo_user: mysql
+
+- name: Start MySQL
+  service: name=mysqld state=started
+  sudo: True
 
 - name: Setting MySQL root password
   mysql_user: check_implicit_admin=yes login_user=root login_password={{ mysql_root_password }}  user=root password={{ mysql_root_password }}
