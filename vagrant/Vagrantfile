@@ -16,10 +16,11 @@ Vagrant.configure(2) do |config|
   config.vm.synced_folder '.', '/vagrant', disabled: true
   config.vm.provider "virtualbox" do |vb|
     vb.gui = false
+    vb.memory = 2048
+    vb.cpus = 2
   end 
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "ansible/main.yml"
-    ansible.verbose = "vv"
     ansible.limit = "all"
   end
 
@@ -28,7 +29,10 @@ Vagrant.configure(2) do |config|
     node_id = "node#{i}"
     config.vm.define node_id do |node|
       node.vm.hostname = "#{node_id}.#{domain}"
-      node.vm.network :private_network, ip: "192.168.25.#{100 + i}"
+      node.vm.network "private_network", ip: "192.168.25.#{100 + i}"
+      if i == 0 then
+        node.vm.network "forwarded_port", guest: 7180, host: 7180
+      end
     end
   end
 

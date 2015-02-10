@@ -24,7 +24,7 @@
     - Restart Networking
   sudo: True
 
-- name: Configure VM Swappiness as zero
+- name: Configure VM Swappiness
   lineinfile: 
     dest=/etc/sysctl.conf
     line="vm.swappiness=0"
@@ -33,4 +33,23 @@
     state=present
   notify:
     - Refresh Kernel
+  sudo: True
+
+- name: Clean Hosts File (local binding)
+  lineinfile:
+    dest=/etc/hosts
+    line="127.0.0.1  localhost"
+    regexp="^127\.0\.0\.1+"
+    backrefs="yes"
+    owner=root
+    state=present
+  sudo: True
+
+- name: Clean Hosts File (IPv6 binding)
+  lineinfile:
+    dest=/etc/hosts
+    regexp="^\:\:1+"
+    backrefs="yes"
+    owner=root
+    state=absent
   sudo: True
