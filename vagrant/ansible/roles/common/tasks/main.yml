@@ -1,3 +1,24 @@
+- name: Create Disk Partition
+  shell: echo -e "n\np\n1\n\n\nw" | fdisk /dev/sdb creates=/dev/sdb1
+  sudo: True
+
+- name: Create File System
+  shell: mkfs.ext4 /dev/sdb1 && if [[ $? == 0 ]]; then touch /dev/sdb.ext4; fi creates=/dev/sdb.ext4
+  sudo: True
+
+- name: Add Filesystem Table Entry
+  lineinfile:
+    dest=/etc/fstab
+    line="/dev/sdb1  /dfs  ext4  noatime  0 0"
+    regexp="^/dev/sdb1+"
+    owner=root
+    state=present
+  sudo: True
+
+- name: Mount DFS Directory
+  shell: mkdir /dfs && mount /dfs creates=/dfs
+  sudo: True
+ 
 - name: Disable IPv6
   lineinfile:
     dest=/etc/sysctl.conf

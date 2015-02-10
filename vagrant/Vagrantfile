@@ -1,11 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 domain = "compute.local"
-master_node_count = 1
-worker_node_count = 1
-node_count = master_node_count + worker_node_count
-master_node_mem = 4096
-worker_node_mem = 4096
+node_count = 5
 
 Vagrant.configure(2) do |config|
   # Set common node options.
@@ -14,11 +10,6 @@ Vagrant.configure(2) do |config|
   config.landrush.tld = "#{domain}"
   config.landrush.enabled = true
   config.vm.synced_folder '.', '/vagrant', disabled: true
-  config.vm.provider "virtualbox" do |vb|
-    vb.gui = false
-    vb.memory = 2048
-    vb.cpus = 2
-  end 
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "ansible/main.yml"
     ansible.limit = "all"
@@ -28,6 +19,16 @@ Vagrant.configure(2) do |config|
   node_count.times do |i|
     node_id = "node#{i}"
     config.vm.define node_id do |node|
+      node.vm.provider "virtualbox" do |vb|
+        disk = "/tmp/vb_disk_node#{i}.vdi"
+        vb.gui = false
+        vb.memory = 2048
+        vb.cpus = 2
+        unless File.exist?(disk)
+          vb.customize ['createhd', '--filename', disk, '--size', 10 * 1024]
+        end
+        vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', disk]
+      end
       node.vm.hostname = "#{node_id}.#{domain}"
       node.vm.network "private_network", ip: "192.168.25.#{100 + i}"
       if i == 0 then
