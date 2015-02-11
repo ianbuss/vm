@@ -1,0 +1,17 @@
+---
+configuration:
+  box: "centos-6.5"
+  masters:
+    count: 2
+  workers: 
+    count: 2
+  domain: "compute.local"
+  services:
+    - zookeeper
+    - hdfs
+    - yarn
+    - hive
+    - impala
+    - spark
+  security:
+    enabled: True
