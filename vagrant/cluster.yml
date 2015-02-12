@@ -1,11 +1,22 @@
 ---
-configuration:
+cluster:
   box: "centos-6.5"
-  masters:
-    count: 2
-  workers: 
-    count: 2
   domain: "compute.local"
+  masters:
+    cpu: 2
+    memory: 2048
+    hdd: 2048
+    nodes:
+      - node1
+      - node2
+  workers: 
+    cpu: 1
+    memory: 1024
+    hdd: 1024
+    nodes:
+      - node3
+      - node4
+      - node5
   services:
     - zookeeper
     - hdfs

@@ -3,40 +3,47 @@
 
 require('yaml')
 
-cluster = YAML.load_file("cluster.yml")
-node_count = cluster["configuration"]["masters"]["count"] + cluster["configuration"]["workers"]["count"]
+# Define globals.
+$configuration = YAML.load_file("cluster.yml")
+$ip_address_counter = 100
 
-Vagrant.configure(2) do |config|
-  # Set common node options.
-  config.vm.box = "#{cluster['configuration']['box']}"
-  config.ssh.pty = true
-  config.landrush.tld = "#{cluster['configuration']['domain']}"
-  config.landrush.enabled = true
-  config.vm.synced_folder '.', '/vagrant', disabled: true
-  config.vm.provision "ansible" do |ansible|
+def generateCommonNodeConfiguration(global_config, node_id, node_spec)
+  global_config.vm.define node_id do |node_config|
+    node_config.vm.provider "virtualbox" do |vb|
+      disk = "/tmp/vb_disk_#{node_id}.vdi"
+      vb.gui = false
+      vb.memory = node_spec["memory"]
+      vb.cpus = node_spec["cpu"]
+      unless File.exist?(disk)
+        vb.customize ['createhd', '--filename', disk, '--size', node_spec["hdd"]]
+      end
+      vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', disk]
+    end
+    $ip_address_counter = #{$ip_address_counter + 1}
+    node_config.vm.hostname = "#{node_id}.#{$configuration['cluster']['domain']}"
+    node_config.vm.network "private_network", ip: "192.168.25.#{$ip_address_counter}"
+  end
+  return "" 
+  #ret global_config.vm.#{node_id}
+end
+
+Vagrant.configure(2) do |global_config|
+  # Set global configuration.
+  global_config.vm.box = "#{$configuration['cluster']['box']}"
+  global_config.ssh.pty = true
+  global_config.landrush.tld = "#{$configuration['cluster']['domain']}"
+  global_config.landrush.enabled = true
+  global_config.vm.synced_folder '.', '/vagrant', disabled: true
+  global_config.vm.provision "ansible" do |ansible|
     ansible.playbook = "ansible/main.yml"
     ansible.limit = "all"
   end
 
-  # Build out each node.
-  node_count.times do |i|
-    node_id = "node#{i}"
-    config.vm.define node_id do |node|
-      node.vm.provider "virtualbox" do |vb|
-        disk = "/tmp/vb_disk_node#{i}.vdi"
-        vb.gui = false
-        vb.memory = 2048
-        vb.cpus = 2
-        unless File.exist?(disk)
-          vb.customize ['createhd', '--filename', disk, '--size', 10 * 1024]
-        end
-        vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', disk]
-      end
-      node.vm.hostname = "#{node_id}.#{cluster['configuration']['domain']}"
-      node.vm.network "private_network", ip: "192.168.25.#{100 + i}"
-      if i == 0 then
-        node.vm.network "forwarded_port", guest: 7180, host: 7180
-      end
+  # Build all node configuration.
+  ["masters", "workers"].each do |node_type|
+    node_spec = $configuration["cluster"][node_type]
+    $configuration["cluster"][node_type]["nodes"].each do |node_id|
+      generateCommonNodeConfiguration(global_config, node_id, node_spec)
     end
   end
 
