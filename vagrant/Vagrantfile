@@ -7,6 +7,18 @@ require('yaml')
 $configuration = YAML.load_file("cluster.yml")
 $ip_address_counter = 100
 
+def generateStaticConfiguration(global_config)
+  global_config.vm.box = "#{$configuration['cluster']['box']}"
+  global_config.ssh.pty = true
+  global_config.landrush.tld = "#{$configuration['cluster']['domain']}"
+  global_config.landrush.enabled = true
+  global_config.vm.synced_folder '.', '/vagrant', disabled: true
+  global_config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "ansible/main.yml"
+    ansible.limit = "all"
+  end
+end
+
 def generateCommonNodeConfiguration(global_config, node_id, node_spec)
   global_config.vm.define node_id do |node_config|
     node_config.vm.provider "virtualbox" do |vb|
@@ -29,15 +41,7 @@ end
 
 Vagrant.configure(2) do |global_config|
   # Set global configuration.
-  global_config.vm.box = "#{$configuration['cluster']['box']}"
-  global_config.ssh.pty = true
-  global_config.landrush.tld = "#{$configuration['cluster']['domain']}"
-  global_config.landrush.enabled = true
-  global_config.vm.synced_folder '.', '/vagrant', disabled: true
-  global_config.vm.provision "ansible" do |ansible|
-    ansible.playbook = "ansible/main.yml"
-    ansible.limit = "all"
-  end
+  generateStaticConfiguration(global_config)
 
   # Build all node configuration.
   ["masters", "workers"].each do |node_type|
