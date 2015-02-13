@@ -9,12 +9,14 @@ $configuration = YAML.load_file("cluster.yml")
 def generateStaticConfiguration(global_config)
   global_config.vm.box = "#{$configuration['cluster']['box']}"
   global_config.ssh.pty = true
+  global_config.ssh.insert_key = false
   global_config.landrush.tld = "#{$configuration['cluster']['domain']}"
   global_config.landrush.enabled = true
   global_config.vm.synced_folder '.', '/vagrant', disabled: true
   global_config.vm.provision "ansible" do |ansible|
+    ansible.extra_vars = { ansible_ssh_user: 'vagrant' }
+    ansible.host_key_checking = false
     ansible.playbook = "ansible/main.yml"
-    ansible.limit = "all"
   end
 end
 
