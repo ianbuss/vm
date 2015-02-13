@@ -1,22 +1,30 @@
 - name: Create Disk Partition
-  shell: echo -e "n\np\n1\n\n\nw" | fdisk /dev/sdb creates=/dev/sdb1
+  with_items: ansible_devices.keys()
+  shell: echo -e "n\np\n1\n\n\nw" | fdisk /dev/{{ item }} creates=/dev/{{ item }}1
+  when: item != 'sda'
   sudo: True
 
 - name: Create File System
-  shell: mkfs.ext4 /dev/sdb1 && if [[ $? == 0 ]]; then touch /dev/sdb.ext4; fi creates=/dev/sdb.ext4
+  with_items: ansible_devices.keys()
+  shell: mkfs.ext4 /dev/{{ item }}1 && if [[ $? == 0 ]]; then touch /dev/{{ item }}.ext4; fi creates=/dev/{{ item }}.ext4
+  when: item != 'sda'
   sudo: True
 
 - name: Add Filesystem Table Entry
+  with_items: ansible_devices.keys()
   lineinfile:
     dest=/etc/fstab
-    line="/dev/sdb1  /dfs  ext4  noatime  0 0"
-    regexp="^/dev/sdb1+"
+    line="/dev/{{ item }}1  /dfs/{{ item }}  ext4  noatime  0 0"
+    regexp="^/dev/{{ item }}1+"
     owner=root
     state=present
+  when: item != 'sda'
   sudo: True
 
 - name: Mount DFS Directory
-  shell: mkdir /dfs && mount /dfs creates=/dfs
+  with_items: ansible_devices.keys()
+  shell: mkdir -p /dfs/{{ item }} && mount /dfs/{{ item }} creates=/dfs/{{ item }}
+  when: item != 'sda'
   sudo: True
  
 - name: Disable IPv6

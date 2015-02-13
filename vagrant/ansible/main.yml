@@ -1,7 +1,9 @@
 ---
-
+  
   # All Hosts
   - hosts: all
+    vars_files:
+      - ../cluster.yml
     roles:
       - common
 
