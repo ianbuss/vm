@@ -5,7 +5,6 @@ require('yaml')
 
 # Define globals.
 $configuration = YAML.load_file("cluster.yml")
-$ip_address_counter = 100
 
 def generateStaticConfiguration(global_config)
   global_config.vm.box = "#{$configuration['cluster']['box']}"
@@ -19,24 +18,24 @@ def generateStaticConfiguration(global_config)
   end
 end
 
-def generateCommonNodeConfiguration(global_config, node_id, node_spec)
-  global_config.vm.define node_id do |node_config|
+def generateCommonNodeConfiguration(global_config, node, node_spec)
+  global_config.vm.define node["name"] do |node_config|
     node_config.vm.provider "virtualbox" do |vb|
-      disk = "/tmp/vb_disk_#{node_id}.vdi"
       vb.gui = false
       vb.memory = node_spec["memory"]
       vb.cpus = node_spec["cpu"]
-      unless File.exist?(disk)
-        vb.customize ['createhd', '--filename', disk, '--size', node_spec["hdd"]]
+      vb.customize ['storagectl', :id, '--name', 'SATA Controller', '--portcount', 30]
+      node_spec["storage"].each.with_index do |hdd_config, index|
+        disk = "#{hdd_config['host_dir']}/vb_disk_#{node['name']}_#{index}.vdi"
+        unless File.exist?(disk)
+          vb.customize ['createhd', '--filename', disk, '--size', hdd_config["capacity"]]
+        end
+        vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', (1 + index), '--device', 0, '--type', 'hdd', '--medium', disk]
       end
-      vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', disk]
     end
-    $ip_address_counter = #{$ip_address_counter + 1}
-    node_config.vm.hostname = "#{node_id}.#{$configuration['cluster']['domain']}"
-    node_config.vm.network "private_network", ip: "192.168.25.#{$ip_address_counter}"
+    node_config.vm.hostname = "#{node['name']}.#{$configuration['cluster']['domain']}"
+    node_config.vm.network "private_network", ip: node["ip"]
   end
-  return "" 
-  #ret global_config.vm.#{node_id}
 end
 
 Vagrant.configure(2) do |global_config|
@@ -46,8 +45,8 @@ Vagrant.configure(2) do |global_config|
   # Build all node configuration.
   ["masters", "workers"].each do |node_type|
     node_spec = $configuration["cluster"][node_type]
-    $configuration["cluster"][node_type]["nodes"].each do |node_id|
-      generateCommonNodeConfiguration(global_config, node_id, node_spec)
+    $configuration["cluster"][node_type]["nodes"].each do |node|
+      generateCommonNodeConfiguration(global_config, node, node_spec)
     end
   end
 

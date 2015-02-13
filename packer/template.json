@@ -33,6 +33,7 @@
       ],
       "boot_wait": "5s",
       "disk_size": 25600,
+      "hard_drive_interface": "sata",
       "guest_os_type": "RedHat_64",
       "http_directory": "http",
       "iso_checksum": "32c7695b97f7dcd1f59a77a71f64f2957dddf738",
