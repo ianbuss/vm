@@ -20,7 +20,7 @@
       "type": "vagrant",
       "override": {
         "virtualbox": {
-          "output": "{{user `boxes`}}/centos-6-5-x64-virtualbox.box"
+          "output": "{{user `box_dir`}}/centos-6-5-x64-virtualbox.box"
         }
       }
     }
@@ -38,7 +38,7 @@
       "http_directory": "http",
       "iso_checksum": "32c7695b97f7dcd1f59a77a71f64f2957dddf738",
       "iso_checksum_type": "sha1",
-      "iso_url": "{{user `mirror`}}/CentOS-6.5-x86_64-bin-DVD1.iso",
+      "iso_url": "{{user `iso_dir`}}/CentOS-6.5-x86_64-bin-DVD1.iso",
       "ssh_username": "vagrant",
       "ssh_password": "vagrant",
       "ssh_port": 22,
@@ -53,7 +53,7 @@
     }
   ],
   "variables": {
-    "boxes": "/Users/cchanning/dev/cloudera/vm/box",
-    "mirror": "/Users/cchanning/dev/cloudera/vm/iso"
+    "box_dir": "",
+    "iso_dir": ""
   }
 }

@@ -1,3 +1,9 @@
+# Packer
+
+Customise the variables in `packer/config.json` to your environment
+
+# Vagrant
+
 Plugins:
   vagrant plugin install landrush
 

@@ -1,3 +1,3 @@
 #!/bin/bash
-packer build template.json
+packer build -var-file=config.json template.json
 rm -rf packer_cache
