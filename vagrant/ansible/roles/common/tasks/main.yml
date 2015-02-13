@@ -23,7 +23,7 @@
 
 - name: Mount DFS Directory
   with_items: ansible_devices.keys()
-  shell: mkdir -p /{{ data_dir }}/{{ item }} && mount /{{ data_dir }}/{{ item }} creates=/dfs/{{ item }}
+  shell: mkdir -p /{{ data_dir }}/{{ item }} && mount /{{ data_dir }}/{{ item }} creates=/{{ data_dir }}/{{ item }}
   when: item != 'sda'
   sudo: True
  
