@@ -7,7 +7,6 @@ cluster:
     memory: 2048
     storage:
       - { capacity: 1024, host_dir: "/tmp" }
-      - { capacity: 1024, host_dir: "/tmp" }
     nodes:
       - { name: "node1", ip: "192.168.50.100" }
       - { name: "node2", ip: "192.168.50.101" }
@@ -15,8 +14,6 @@ cluster:
     cpu: 1
     memory: 1024
     storage:
-      - { capacity: 1024, host_dir: "/tmp" }
-      - { capacity: 1024, host_dir: "/tmp" }
       - { capacity: 1024, host_dir: "/tmp" }
       - { capacity: 1024, host_dir: "/tmp" }
     nodes:

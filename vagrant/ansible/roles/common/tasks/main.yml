@@ -14,7 +14,7 @@
   with_items: ansible_devices.keys()
   lineinfile:
     dest=/etc/fstab
-    line="/dev/{{ item }}1  /dfs/{{ item }}  ext4  noatime  0 0"
+    line="/dev/{{ item }}1  /{{ data_dir }}/{{ item }}  ext4  noatime  0 0"
     regexp="^/dev/{{ item }}1+"
     owner=root
     state=present
@@ -23,7 +23,7 @@
 
 - name: Mount DFS Directory
   with_items: ansible_devices.keys()
-  shell: mkdir -p /dfs/{{ item }} && mount /dfs/{{ item }} creates=/dfs/{{ item }}
+  shell: mkdir -p /{{ data_dir }}/{{ item }} && mount /{{ data_dir }}/{{ item }} creates=/dfs/{{ item }}
   when: item != 'sda'
   sudo: True
  
